@@ -101,7 +101,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
                 temperature=temperature,
                 top_p=top_p
             )
-            chat_messages_container.markdown(response.message)
+            st.markdown(response.message)
     message = {"role": "assistant", "content": response.message}
     st.session_state.messages.append(message)
 

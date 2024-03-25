@@ -2,8 +2,9 @@ import streamlit as st
 import replicate
 import os
 import yaml
+import json
 
-from utils import clear_chat_history, generate_response
+from utils import clear_chat_history, gen_replicate_response
 
 
 with open('models.yml', 'r') as file:
@@ -62,21 +63,19 @@ with st.sidebar:
         step=0.01
     )
 
-    max_length = st.sidebar.slider(
-        label='max_length',
-        min_value=32,
-        max_value=128,
-        value=120,
-        step=8
-    )
-
     st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
-    st.sidebar.write(f'Latest messages from: {st.session_state.messages[-1]["role"]}')
+    messages_len = 0
+    for message in st.session_state.messages:
+        messages_len += len(message['content'])
+    st.sidebar.write(f'The length of all messages is now {messages_len} characters.')
+
+
+chat_tab, stats_tab = st.tabs(["Chat", "Stats"])
 
 # Display or clear chat messages
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+    with chat_tab.chat_message(message["role"]):
+        chat_tab.write(message["content"])
 
 # User-provided prompt
 prompt = st.chat_input(
@@ -86,22 +85,21 @@ prompt = st.chat_input(
 
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
+    chat_tab.chat_message("user").write(prompt)
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant"):
+    with chat_tab.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = generate_response(
+            response = gen_replicate_response(
                 client=client,
                 messages=st.session_state.messages,
                 prompt_input=prompt,
                 llm=llm,
                 temperature=temperature,
-                top_p=top_p,
-                max_length=max_length
+                top_p=top_p
             )
-            placeholder = st.empty()
+            placeholder = chat_tab.empty()
             full_response = ''
             for item in response:
                 full_response += item
@@ -109,3 +107,20 @@ if st.session_state.messages[-1]["role"] != "assistant":
             placeholder.markdown(full_response)
     message = {"role": "assistant", "content": full_response}
     st.session_state.messages.append(message)
+
+
+stats_tab.subheader('Statistics')
+n_messages = len(st.session_state.messages)
+total_len_messages = 0
+tokens = []
+for message in st.session_state.messages:
+    total_len_messages += len(message['content'])
+    tokens = tokens + message['content'].split()
+average_len_messages = total_len_messages/n_messages 
+stats_tab.write(f'{n_messages} included in the chat,')
+stats_tab.write(f'with a total length of {total_len_messages}')
+stats_tab.write(f'and a average length of {average_len_messages}.')
+stats_tab.write(f'There are a total of {len(tokens)} words in the chat.')
+
+stats_tab.subheader('Messages-dict')
+stats_tab.json(json.dumps(st.session_state.messages, indent=2))

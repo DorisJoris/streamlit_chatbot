@@ -1,3 +1,7 @@
 .env
 .venv/*
 .streamlit/*
+*.pyc
+__pycache__/
+build/
+dist/

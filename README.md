@@ -8,3 +8,9 @@ To us the chatbot a .streamlit/secrets.toml file has to be added, containing api
 Replicate = "replicate_api_key"
 Openai = "openai_api_key
 ```
+
+The streamlit-application can be run locally with:
+
+```
+streamlit run home.py
+```

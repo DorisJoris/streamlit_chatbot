@@ -12,10 +12,6 @@ class client(ABC):
     def __init__(self, api_key: str):
         pass
 
-    # @abstractmethod
-    # def connect(self, api_key: str):
-    #     pass
-
     @property
     @abstractmethod
     def models(self) -> dict:

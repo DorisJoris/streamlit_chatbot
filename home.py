@@ -5,6 +5,8 @@ import yaml
 import json
 
 from utils import clear_chat_history, gen_replicate_response
+from clients.clients import clients_dict
+
 
 
 with open('models.yml', 'r') as file:
@@ -22,30 +24,27 @@ if "messages" not in st.session_state.keys():
         }
     ]
 
-# Replicate Credentials
+# Sidebar
 with st.sidebar:
-    st.title('Chatbot credentials')
-    if 'REPLICATE_KEY' in st.secrets:
-        st.success('API keys provided by streamlit!', icon='✅')
-        REPLICATE_KEY = st.secrets['REPLICATE_KEY']
-        os.environ['REPLICATE_API_TOKEN'] = REPLICATE_KEY
-        chat_disabled = False
-    else:
-        st.warning('API keys missing!', icon='⚠️')
-        chat_disabled = True
-
-    client = replicate.Client(
-        api_token=REPLICATE_KEY
+    st.subheader('Models and parameters')
+    
+    selected_provider =st.sidebar.selectbox(
+        label='Choose a LLM provider',
+        options=clients_dict.keys(),
+        key='selected_provider'
     )
 
-    st.subheader('Models and parameters')
-    selected_model = st.sidebar.selectbox(
+    client = clients_dict[selected_provider](
+        api_token=st.secrets[selected_provider]
+    )
+
+    selected_model_name = st.sidebar.selectbox(
         label='Choose a model',
-        options=models.keys(),
+        options=client.models.keys(),
         key='selected_model'
     )
 
-    llm = models[selected_model]
+    selected_model = client.models[selected_model_name]
 
     temperature = st.sidebar.slider(
         label='Temperature',
@@ -63,49 +62,49 @@ with st.sidebar:
         step=0.01
     )
 
+    init_prompt = st.sidebar.text_area(
+        label="Initial prompt to the LLM.",
+        value= ("You are a helpful assistant. "
+                "You do not respond as 'User' or pretend to be 'User'. "
+                "You only respond once as 'Assistant'.")
+    )
+
     st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
-    messages_len = 0
-    for message in st.session_state.messages:
-        messages_len += len(message['content'])
-    st.sidebar.write(f'The length of all messages is now {messages_len} characters.')
 
-
+# Main area
 chat_tab, stats_tab = st.tabs(["Chat", "Stats"])
 
+chat_messages_container = chat_tab.container()
 # Display or clear chat messages
 for message in st.session_state.messages:
-    with chat_tab.chat_message(message["role"]):
-        chat_tab.write(message["content"])
+    chat_messages_container.chat_message(
+        message["role"]
+    ).write(message["content"])
 
 # User-provided prompt
-prompt = st.chat_input(
+prompt = chat_tab.chat_input(
     placeholder="Your message...",
-    disabled = chat_disabled
+    disabled = False
 )
 
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
-    chat_tab.chat_message("user").write(prompt)
+    chat_messages_container.chat_message("user").write(prompt)
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
-    with chat_tab.chat_message("assistant"):
+    with chat_messages_container.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = gen_replicate_response(
-                client=client,
+            response = client.generate_response(
+                init_prompt=init_prompt,
                 messages=st.session_state.messages,
                 prompt_input=prompt,
-                llm=llm,
+                selected_model=selected_model,
                 temperature=temperature,
                 top_p=top_p
             )
-            placeholder = chat_tab.empty()
-            full_response = ''
-            for item in response:
-                full_response += item
-                placeholder.markdown(full_response)
-            placeholder.markdown(full_response)
-    message = {"role": "assistant", "content": full_response}
+            chat_messages_container.markdown(response.message)
+    message = {"role": "assistant", "content": response.message}
     st.session_state.messages.append(message)
 
 

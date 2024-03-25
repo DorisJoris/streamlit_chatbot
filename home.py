@@ -72,7 +72,7 @@ with st.sidebar:
 # Main area
 chat_tab, stats_tab = st.tabs(["Chat", "Stats"])
 
-chat_messages_container = chat_tab.container()
+chat_messages_container = chat_tab.container(height=500, border=True)
 # Display or clear chat messages
 for message in st.session_state.messages:
     chat_messages_container.chat_message(

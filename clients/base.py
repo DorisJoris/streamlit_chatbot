@@ -8,6 +8,14 @@ class response(ABC):
         return self._message
 
 class client(ABC):
+    @abstractmethod
+    def __init__(self, api_key: str):
+        pass
+
+    # @abstractmethod
+    # def connect(self, api_key: str):
+    #     pass
+
     @property
     @abstractmethod
     def models(self) -> dict:

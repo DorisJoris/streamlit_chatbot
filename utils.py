@@ -16,7 +16,7 @@ def gen_replicate_response(
 ):
     string_dialogue = "You are a helpful assistant. You do not respond as 'User' or pretend to be 'User'. You only respond once as 'Assistant'."
     for dict_message in messages:
-        string_dialogue += dict_message["role"].capitalize() + dict_message["content"] + "\n\n"
+        string_dialogue += dict_message["role"].capitalize()+ ":" + dict_message["content"] + "\n\n"
     output = client.run(
         llm, 
         input={

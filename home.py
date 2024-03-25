@@ -1,11 +1,9 @@
 import streamlit as st
-import replicate
-import os
 import yaml
 import json
 
 from utils import clear_chat_history, gen_replicate_response
-from clients.clients import clients_dict
+from clients import clients_dict
 
 
 

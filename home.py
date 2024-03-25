@@ -2,7 +2,7 @@ import streamlit as st
 import yaml
 import json
 
-from utils import clear_chat_history, gen_replicate_response
+from utils import clear_chat_history
 from clients import clients_dict
 
 

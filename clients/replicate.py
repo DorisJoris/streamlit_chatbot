@@ -1,13 +1,13 @@
 import replicate
 import yaml
 
-from clients.base import client, response
+from clients.base import Client, Response
 
 
 with open('models.yml', 'r') as file:
     models = yaml.safe_load(file)['replicate']
 
-class Replicate_Response(response):
+class ReplicateResponse(Response):
     def __init__(self, selected_model, run_input, output):
         self._selected_model = selected_model
         self._run_input = run_input
@@ -28,7 +28,7 @@ class Replicate_Response(response):
         return self._selected_model
 
 
-class Replicate_Client(client):
+class ReplicateClient(Client):
     def __init__(self, api_token):
         self._provider = "Replicate"
         self._models = models
@@ -52,7 +52,7 @@ class Replicate_Client(client):
             selected_model: str,
             temperature: float,
             top_p: float
-    ) -> response:
+    ) -> Response:
         prompt = init_prompt + " "
         
         for message_dict in messages:
@@ -71,4 +71,4 @@ class Replicate_Client(client):
             input=run_input
         )
         
-        return Replicate_Response(selected_model, run_input, output)
+        return ReplicateResponse(selected_model, run_input, output)

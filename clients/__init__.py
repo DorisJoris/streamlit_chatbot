@@ -1,6 +1,6 @@
-from clients.replicate import Replicate_Client
+from clients.replicate import ReplicateClient
 
 
 clients_dict = {
-    'Replicate': Replicate_Client,
+    'Replicate': ReplicateClient,
 }

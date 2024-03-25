@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 
-class response(ABC):
+class Response(ABC):
     @property
     @abstractmethod
     def message(self) -> str:
         # Returns the generated respones message as a string.
         return self._message
 
-class client(ABC):
+class Client(ABC):
     @abstractmethod
     def __init__(self, api_key: str):
         pass
@@ -20,6 +20,6 @@ class client(ABC):
         return self._models
     
     @abstractmethod
-    def generate_response(self, *args, **kwargs) -> response:
+    def generate_response(self, *args, **kwargs) -> Response:
         # returns a response object
         pass

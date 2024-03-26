@@ -6,3 +6,4 @@ __pycache__/
 build/
 dist/
 testing.ipynb
+.flake8

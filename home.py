@@ -96,7 +96,8 @@ with st.sidebar:
                 label="Name of your new system prompt",
                 value=f"User {next_user_nr}"
             )
-
+            savecol2.write("")
+            savecol2.write("")
             if savecol2.button("Save system prompt"):
                 st.session_state.system_prompts[new_sp_name] = st.session_state.system_prompt
                 st.session_state.selected_system_prompt = new_sp_name

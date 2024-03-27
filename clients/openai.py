@@ -1,20 +1,19 @@
-import replicate
+from openai import OpenAI
 import yaml
 
 from clients.base import Client, Response
 
 
 with open('models.yml', 'r') as file:
-    models = yaml.safe_load(file)['replicate']
+    models = yaml.safe_load(file)['openai-chat']
 
 
-class ReplicateResponse(Response):
+# --- A cliente and response class for the Openai chat.completion api ---
+class OpenaiChatResponse(Response):
     def __init__(self, model, run_input, output):
         self._model = model
         self._run_input = run_input
-        self._message = ''
-        for item in output:
-            self._message += item
+        self._message = output.choices[0].message.content
 
     @property
     def message(self) -> str:
@@ -29,12 +28,12 @@ class ReplicateResponse(Response):
         return self._model
 
 
-class ReplicateClient(Client):
+class OpenaiChatClient(Client):
     def __init__(self, api_token):
-        self._provider = "Replicate"
+        self._provider = "Openai"
         self._models = models
-        self.client = replicate.Client(
-            api_token=api_token
+        self.client = OpenAI(
+            api_key=api_token
         )
 
     @property
@@ -53,22 +52,20 @@ class ReplicateClient(Client):
         top_p: float,
         temperature: float
     ) -> Response:
-        prompt = ""
 
-        for message_dict in messages:
-            prompt += message_dict["role"] + ": "
-            prompt += message_dict["content"] + "\n\n"
+        messages = [
+            {"role": "system", "content": system_prompt}
+        ] + messages
 
         run_input = {
-            "system_prompt": system_prompt,
-            "prompt": f"{prompt} Assistant:",
+            "messages": messages,
             "temperature": temperature,
             "top_p": top_p
         }
 
-        output = self.client.run(
-            model,
-            input=run_input
+        output = self.client.chat.completions.create(
+            model=model,
+            **run_input
         )
 
-        return ReplicateResponse(model, run_input, output)
+        return OpenaiChatResponse(model, run_input, output)

@@ -2,11 +2,15 @@ import streamlit as st
 import yaml
 import json
 
-from utils import clear_chat_history
+from utils import clear_chat_history, save_session_state
 from clients import clients_dict
 
 
 # Prepare session_state
+if "saves" not in st.session_state.keys():
+    with open('saves.yml', 'r') as file:
+        st.session_state.saves = yaml.safe_load(file)
+
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
         {
@@ -31,6 +35,8 @@ if "system_prompt" not in st.session_state.keys():
 
 # App title
 st.set_page_config(page_title="Joris LLM Chatbot")
+
+st.session_state.saves = save_session_state('autosave', st.session_state)
 
 # Sidebar
 with st.sidebar:
@@ -58,8 +64,8 @@ with st.sidebar:
         temperature = st.slider(
             label='Temperature',
             min_value=0.01,
-            max_value=5.0,
-            value=0.1,
+            max_value=2.0,
+            value=1.0,
             step=0.01
         )
 

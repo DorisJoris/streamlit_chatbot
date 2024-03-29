@@ -8,7 +8,7 @@ from clients import clients_dict
 
 # Prepare session_state
 if "saves" not in st.session_state.keys():
-    with open('saves.yml', 'r') as file:
+    with open('session_saves.yml', 'r') as file:
         st.session_state.saves = yaml.safe_load(file)
 
 if "messages" not in st.session_state.keys():

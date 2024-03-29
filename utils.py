@@ -14,7 +14,7 @@ def save_session_state(savename, session_state):
         if key != "saves":
             session_state.saves[savename][key] = value
 
-    with open('saves.yml', 'w') as file:
+    with open('session_saves.yml', 'w') as file:
         yaml.dump(session_state.saves, file)
 
     return session_state.saves

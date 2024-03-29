@@ -18,3 +18,10 @@ def save_session_state(savename, session_state):
         yaml.dump(session_state.saves, file)
 
     return session_state.saves
+
+def load_save(savename, session_state):
+    for key, value in session_state.saves[savename].items():
+        if key != "time":
+            session_state[key] = value
+
+    return session_state

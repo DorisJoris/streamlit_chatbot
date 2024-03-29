@@ -7,4 +7,4 @@ build/
 dist/
 testing.ipynb
 .flake8
-session_saves.yml
+saves/saves.yml

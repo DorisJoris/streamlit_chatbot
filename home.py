@@ -2,36 +2,43 @@ import streamlit as st
 import yaml
 import json
 
-from utils import clear_chat_history, save_session_state
+from utils import clear_chat_history, save_session_state, load_save
 from clients import clients_dict
 
 
 # Prepare session_state
 if "saves" not in st.session_state.keys():
-    with open('session_saves.yml', 'r') as file:
+    with open('saves/init_save.yml', 'r') as file:
         st.session_state.saves = yaml.safe_load(file)
 
-if "messages" not in st.session_state.keys():
-    st.session_state.messages = [
-        {
-            "role": "assistant",
-            "content": "How may I assist you today?"
-        }
-    ]
+    with open('saves/saves.yml', 'r') as file:
+        st.session_state.saves = st.session_state.saves.update(
+            yaml.safe_load(file)
+        )
 
-if "system_prompts" not in st.session_state.keys():
-    with open('system_prompts.yml', 'r') as file:
-        st.session_state.system_prompts = yaml.safe_load(file)
+    st.session_state = load_save('init', st.session_state)
 
-if "selected_system_prompt" not in st.session_state.keys():
-    st.session_state.selected_system_prompt = list(
-        st.session_state.system_prompts.keys()
-    )[0]
+# if "messages" not in st.session_state.keys():
+#     st.session_state.messages = [
+#         {
+#             "role": "assistant",
+#             "content": "How may I assist you today?"
+#         }
+#     ]
 
-if "system_prompt" not in st.session_state.keys():
-    st.session_state.system_prompt = st.session_state.system_prompts[
-        st.session_state.selected_system_prompt
-    ]
+# if "system_prompts" not in st.session_state.keys():
+#     with open('system_prompts.yml', 'r') as file:
+#         st.session_state.system_prompts = yaml.safe_load(file)
+
+# if "selected_system_prompt" not in st.session_state.keys():
+#     st.session_state.selected_system_prompt = list(
+#         st.session_state.system_prompts.keys()
+#     )[0]
+
+# if "system_prompt" not in st.session_state.keys():
+#     st.session_state.system_prompt = st.session_state.system_prompts[
+#         st.session_state.selected_system_prompt
+#     ]
 
 # App title
 st.set_page_config(page_title="Joris LLM Chatbot")

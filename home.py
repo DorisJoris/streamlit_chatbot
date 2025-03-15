@@ -1,6 +1,8 @@
 import streamlit as st
+import streamlit_authenticator as stauth
 import yaml
 import json
+import pprint
 
 from utils import clear_chat_history, save_session_state, load_save
 from clients import clients_dict
@@ -12,33 +14,11 @@ if "saves" not in st.session_state.keys():
         st.session_state.saves = yaml.safe_load(file)
 
     with open('saves/saves.yml', 'r') as file:
-        st.session_state.saves = st.session_state.saves.update(
-            yaml.safe_load(file)
-        )
+        saves = yaml.safe_load(file)
+        if saves:
+            st.session_state.saves.update(saves)
 
     st.session_state = load_save('init', st.session_state)
-
-# if "messages" not in st.session_state.keys():
-#     st.session_state.messages = [
-#         {
-#             "role": "assistant",
-#             "content": "How may I assist you today?"
-#         }
-#     ]
-
-# if "system_prompts" not in st.session_state.keys():
-#     with open('system_prompts.yml', 'r') as file:
-#         st.session_state.system_prompts = yaml.safe_load(file)
-
-# if "selected_system_prompt" not in st.session_state.keys():
-#     st.session_state.selected_system_prompt = list(
-#         st.session_state.system_prompts.keys()
-#     )[0]
-
-# if "system_prompt" not in st.session_state.keys():
-#     st.session_state.system_prompt = st.session_state.system_prompts[
-#         st.session_state.selected_system_prompt
-#     ]
 
 # App title
 st.set_page_config(page_title="Joris LLM Chatbot")
@@ -155,18 +135,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
     st.session_state.messages.append(message)
 
 
-stats_tab.subheader('Statistics')
-n_messages = len(st.session_state.messages)
-total_len_messages = 0
-tokens = []
-for message in st.session_state.messages:
-    total_len_messages += len(message['content'])
-    tokens = tokens + message['content'].split()
-average_len_messages = total_len_messages/n_messages
-stats_tab.write(f'{n_messages} included in the chat,')
-stats_tab.write(f'with a total length of {total_len_messages}')
-stats_tab.write(f'and a average length of {average_len_messages}.')
-stats_tab.write(f'There are a total of {len(tokens)} words in the chat.')
+stats_tab.subheader('Saves')
 
-stats_tab.subheader('Messages-dict')
-stats_tab.json(json.dumps(st.session_state.messages, indent=2))
+stats_tab.text(pprint.pformat(st.session_state.saves))

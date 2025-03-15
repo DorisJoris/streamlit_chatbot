@@ -8,3 +8,4 @@ dist/
 testing.ipynb
 .flake8
 saves/saves.yml
+login_config.yaml
